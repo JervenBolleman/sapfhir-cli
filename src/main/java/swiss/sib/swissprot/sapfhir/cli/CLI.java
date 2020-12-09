@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Instant;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
@@ -53,17 +55,28 @@ public class CLI implements Callable<Integer> {
     @Option(names = {"-b", "--base"}, defaultValue = "http://example.org/vg/")
     public String base;
 
+    @Option(names = {"-t", "--time"}, description = "Time how long the operations take")
+    public boolean time = false;
+
     @Parameters(index = "0", description = "The SPARQL query to test")
     public String query;
 
     @Override
     public Integer call() throws IOException {
+        var startLoad = Instant.now();
         SimplePathGraph spg = loadGFA(gfaFile);
+        var endLoad = Instant.now();
+        if (time) {
+
+            long loadTime = SECONDS.between(startLoad, endLoad);
+            System.err.println("Loaded data in " + loadTime);
+        }
         var rep = new PathHandleGraphSail<>(spg, base);
         try {
             SailRepository sr = new SailRepository(rep);
             rep.initialize();
             Query pTQ = sr.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, query);
+            var startQuery = Instant.now();
             if (pTQ instanceof TupleQuery) {
                 SPARQLResultsCSVWriter handler = new SPARQLResultsCSVWriter(System.out);
                 ((TupleQuery) pTQ).evaluate(handler);
@@ -74,6 +87,11 @@ public class CLI implements Callable<Integer> {
                 QueryResultWriter createWriter = QueryResultIO.createWriter(BooleanQueryResultFormat.TEXT, System.out);
                 boolean evaluate = ((BooleanQuery) pTQ).evaluate();
                 createWriter.handleBoolean(evaluate);
+            }
+            var endQuery = Instant.now();
+            if (time) {
+                long queryTime = SECONDS.between(startQuery, endQuery);
+                System.err.println("Queried in " + queryTime);
             }
             return 0;
         } catch (MalformedQueryException e) {
