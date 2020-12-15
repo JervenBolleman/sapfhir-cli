@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>handlegraph4jRDF</artifactId>
+            <artifactId>handlegraph4j-rdf</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -133,4 +133,27 @@
     </dependencies>
     <name>sapfhir-cli</name>
     <description>Acess DNA variation graph handlegraphs as SPARQL on the local command line.</description>
+ <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Jerven Bolleman Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/JervenBolleman/sapfhir-cli</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <repository>
+          <id>github</id>
+          <name>GitHub Jerven Bolleman handlegraph4j Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/jervenbolleman/sapfhir</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+      </repositories>
 </project>
