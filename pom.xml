@@ -53,7 +53,7 @@
                     <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.graalvm.nativeimage</groupId>
                 <artifactId>native-image-maven-plugin</artifactId>
                 <version>${graalvm.version}</version>
@@ -69,10 +69,10 @@
                     <imageName>${project.artifactId}</imageName>
                     <mainClass>swiss.sib.swissprot.sapfhir.cli.CLI</mainClass>
                     <buildArgs>
-                        --report-unsupported-elements-at-runtime --no-fallback
+                        - -report-unsupported-elements-at-runtime - -no-fallback
                     </buildArgs>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
     
