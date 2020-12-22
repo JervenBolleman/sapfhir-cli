@@ -1,8 +1,13 @@
 package swiss.sib.swissprot.sapfhir.cli;
 
 import io.github.vgteam.handlegraph4j.gfa1.GFA1Reader;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -52,11 +57,17 @@ public class CLI implements Callable<Integer> {
     @Option(names = {"-g", "--gfa"})
     public File gfaFile;
 
+    @Option(names = {"-f", "--byte-buffer"})
+    public File byteBuffer;
+
     @Option(names = {"-b", "--base"}, defaultValue = "http://example.org/vg/")
     public String base;
 
     @Option(names = {"-t", "--time"}, description = "Time how long the operations take")
     public boolean time = false;
+
+    @Option(names = {"-c", "--convert-to-byte"}, description = "Covert a GFA to handlegraph4j-simple")
+    public boolean convert = false;
 
     @Parameters(index = "0", description = "The SPARQL query to test")
     public String query;
@@ -64,7 +75,14 @@ public class CLI implements Callable<Integer> {
     @Override
     public Integer call() throws IOException {
         var startLoad = Instant.now();
-        SimplePathGraph spg = loadGFA(gfaFile);
+        SimplePathGraph spg;
+        if (gfaFile != null) {
+            spg = loadGFA(gfaFile);
+        } else if (byteBuffer != null) {
+            spg = loadByteBuffer(byteBuffer);
+        } else {
+            return 1;
+        }
         var endLoad = Instant.now();
         if (time) {
 
@@ -72,6 +90,9 @@ public class CLI implements Callable<Integer> {
             System.err.println("Loaded data in " + loadTime);
         }
         var rep = new PathHandleGraphSail<>(spg, base);
+        int status = convertToByteBuffer(spg);
+        if (status != 0)
+            return status;
         try {
             SailRepository sr = new SailRepository(rep);
             rep.initialize();
@@ -102,6 +123,30 @@ public class CLI implements Callable<Integer> {
             System.err.println("failed in rdf4j/sapfhir code");
             return 1;
         }
+    }
+
+    private int convertToByteBuffer(SimplePathGraph spg) throws IOException {
+        if (convert) {
+            if (gfaFile == null)
+                return 2;
+            else if (byteBuffer == null)
+                return 3;
+            var startConvert = Instant.now();
+            try ( FileOutputStream fos = new FileOutputStream(byteBuffer);  BufferedOutputStream bos = new BufferedOutputStream(fos);  DataOutputStream out = new DataOutputStream(bos)) {
+                spg.writeTo(out);
+            }
+            var endConvert = Instant.now();
+            if (time) {
+                long convertTime = SECONDS.between(startConvert, endConvert);
+                System.err.println("Converted data in " + convertTime);
+            }
+        }
+        return 0;
+    }
+
+    private SimplePathGraph loadByteBuffer(File byteBuffer) throws FileNotFoundException, IOException {
+        RandomAccessFile raf = new RandomAccessFile(byteBuffer, "r");
+        return SimplePathGraph.open(raf);
     }
 
     private SimplePathGraph loadGFA(File gfaFile) throws IOException {
