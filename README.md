@@ -43,4 +43,4 @@ java -jar target/sapfhir-cli-1.0-SNAPSHOT-jar-with-dependencies.jar \
 This is a [RDF4j](https://rdf4j.org/) SAIL implementation that can take any handlegraph4j 
 implementation and represent it as a [W3C sparql 1.1](https://www.w3.org/TR/sparql11-query/) endpoint. 
 
-It is beleived to be functionally complete.
+It is believed to be functionally complete.
