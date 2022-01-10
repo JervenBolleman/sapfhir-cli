@@ -8,7 +8,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
-        <eclipse.rdf4j.version>3.7.3</eclipse.rdf4j.version>
+        <eclipse.rdf4j.version>4.0.0-SNAPSHOT</eclipse.rdf4j.version>
         <graalvm.version>20.2.0</graalvm.version>
         <picocli.version>4.5.2</picocli.version>
     </properties>
@@ -33,7 +33,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 
                     <annotationProcessorPaths>
                         <path>
