@@ -95,7 +95,7 @@ public class CLI implements Callable<Integer> {
             return status;
         try {
             SailRepository sr = new SailRepository(rep);
-            rep.initialize();
+            rep.init();
             Query pTQ = sr.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, query);
             var startQuery = Instant.now();
             if (pTQ instanceof TupleQuery) {
