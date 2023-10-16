@@ -26,13 +26,13 @@ cd ..
 ```
 
 ```
-mvn assembly:assembly
+mvn package
 ```
 
 # Run
 
 ```
-java -jar target/sapfhir-cli-1.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar target/sapfhir-cli-0.2-SNAPSHOT-jar-with-dependencies.jar \
     --gfa ~/git/odgi/test/t.gfa \
     -Xmx12g \
     "PREFIX vg:<http://biohackathon.org/resource/vg#> SELECT ?path WHERE {?path a vg:Path}"
