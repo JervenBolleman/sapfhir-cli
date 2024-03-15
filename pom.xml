@@ -30,8 +30,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>17</maven.compiler.release>
-		<eclipse.rdf4j.version>4.3.7</eclipse.rdf4j.version>
+		<eclipse.rdf4j.version>5.0.0-M2</eclipse.rdf4j.version>
 		<picocli.version>4.7.5</picocli.version>
+        <sapfhir.version>0.2-SNAPSHOT</sapfhir.version>
 	</properties>
 	<build>
 		<plugins>
@@ -180,7 +181,7 @@
 		<dependency>
 			<groupId>io.github.jervenbolleman</groupId>
 			<artifactId>sapfhir</artifactId>
-			<version>0.1</version>
+			<version>${sapfhir.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>

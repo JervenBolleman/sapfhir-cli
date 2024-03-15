@@ -52,10 +52,10 @@ import org.eclipse.rdf4j.query.resultio.QueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.text.csv.SPARQLResultsCSVWriter;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
-import org.eclipse.rdf4j.sail.Sail;
 import org.eclipse.rdf4j.sail.SailException;
 
 import io.github.jervenbolleman.handlegraph4j.gfa1.GFA1Reader;
@@ -95,6 +95,9 @@ public class CLI implements Callable<Integer> {
 	@Parameters(index = "0", description = "The SPARQL query to test")
 	public String query;
 
+	@Option(names= {"--sync-every"}, defaultValue = "100000")
+	private long iterationCacheSyncThreshold = 100_000;
+	
 	@Override
 	public Integer call() throws IOException {
 		var startLoad = Instant.now();
@@ -112,31 +115,35 @@ public class CLI implements Callable<Integer> {
             long loadTime = SECONDS.between(startLoad, endLoad);
             System.err.println("Loaded data in " + loadTime);
         }
-        Sail rep = new PathHandleGraphSail<>(spg, base);
+		PathHandleGraphSail<?,?,?,?> rep = new PathHandleGraphSail<>(spg, base);
+        rep.setIterationCacheSyncThreshold(iterationCacheSyncThreshold);
         int status = convertToByteBuffer(spg);
         if (status != 0)
             return status;
-        try {
-            SailRepository sr = new SailRepository(rep);
-            rep.init();
-            Query pTQ = sr.getConnection().prepareQuery(QueryLanguage.SPARQL, query);
-            var startQuery = Instant.now();
-            if (pTQ instanceof TupleQuery) {
-                SPARQLResultsCSVWriter handler = new SPARQLResultsCSVWriter(System.out);
-                ((TupleQuery) pTQ).evaluate(handler);
-            } else if (pTQ instanceof GraphQuery) {
-                RDFHandler createWriter = new TurtleWriter(System.out);
-                ((GraphQuery) pTQ).evaluate(createWriter);
-            } else if (pTQ instanceof BooleanQuery) {
-                QueryResultWriter createWriter = QueryResultIO.createWriter(BooleanQueryResultFormat.TEXT, System.out);
-                boolean evaluate = ((BooleanQuery) pTQ).evaluate();
-                createWriter.handleBoolean(evaluate);
-            }
-            var endQuery = Instant.now();
-            if (time) {
-                long queryTime = SECONDS.between(startQuery, endQuery);
-                System.err.println("Queried in " + queryTime);
-            }
+		try {
+			SailRepository sr = new SailRepository(rep);
+			rep.init();
+			try (SailRepositoryConnection connection = sr.getConnection()) {
+				Query pTQ = connection.prepareQuery(QueryLanguage.SPARQL, query);
+				var startQuery = Instant.now();
+				if (pTQ instanceof TupleQuery) {
+					SPARQLResultsCSVWriter handler = new SPARQLResultsCSVWriter(System.out);
+					((TupleQuery) pTQ).evaluate(handler);
+				} else if (pTQ instanceof GraphQuery) {
+					RDFHandler createWriter = new TurtleWriter(System.out);
+					((GraphQuery) pTQ).evaluate(createWriter);
+				} else if (pTQ instanceof BooleanQuery) {
+					QueryResultWriter createWriter = QueryResultIO.createWriter(BooleanQueryResultFormat.TEXT,
+							System.out);
+					boolean evaluate = ((BooleanQuery) pTQ).evaluate();
+					createWriter.handleBoolean(evaluate);
+				}
+				var endQuery = Instant.now();
+				if (time) {
+					long queryTime = SECONDS.between(startQuery, endQuery);
+					System.err.println("Queried in " + queryTime);
+				}
+			}
             return 0;
         } catch (MalformedQueryException e) {
             System.err.println("Query syntax is broken");
@@ -144,6 +151,7 @@ public class CLI implements Callable<Integer> {
         } catch (SailException | QueryEvaluationException | RDFHandlerException | TupleQueryResultHandlerException
                 | RepositoryException e) {
             System.err.println("failed in rdf4j/sapfhir code");
+            e.printStackTrace();
             return 1;
         }
     }
