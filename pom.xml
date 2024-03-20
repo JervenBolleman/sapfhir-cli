@@ -32,7 +32,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<eclipse.rdf4j.version>5.0.0-M2</eclipse.rdf4j.version>
 		<picocli.version>4.7.5</picocli.version>
-        <sapfhir.version>0.2-SNAPSHOT</sapfhir.version>
+        <sapfhir.version>0.2-M2</sapfhir.version>
 	</properties>
 	<build>
 		<plugins>
@@ -153,7 +153,7 @@
 		<dependency>
 			<groupId>io.github.jervenbolleman</groupId>
 			<artifactId>handlegraph4j</artifactId>
-			<version>1.0</version>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.jervenbolleman</groupId>
@@ -163,19 +163,19 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.10.0</version>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.10.0</version>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.0</version>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
